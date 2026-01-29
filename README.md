@@ -11,6 +11,7 @@ REST API for managing books and their inventory
 - [Design](#design)
     - [Domain model (high level)](#domain-model-high-level)
 - [Business rules](#business-rules)
+    - [Valid and Invalid Stock Rules](#-valid-and-invalid-stock-rules)
 - [How to execute](#how-to-execute)
 - [What would improve next time?](#what-would-improve-next-time)
 
@@ -82,13 +83,24 @@ Provide a solid foundation for managing:
 
 Each movement impacts the inventory and is recorded for auditing purposes.
 
-## Business rules
+## ⚙️ Business Rules (Summary)
 
 - Stock can never be negative.
 
 - Any change in stock must generate a movement.
 
 - Stock removals are rejected if there is insufficient quantity.
+
+### 📊 Valid and Invalid Stock Rules
+
+| Movement | Condition | Result |
+|----------|-----------|--------|
+| IN       | Quantity > 0 and current stock + quantity ≤ 10 | Valid: stock increases |
+| IN       | Quantity ≤ 0 | Invalid: error "Invalid quantity" |
+| IN       | Current stock + quantity > 10 | Invalid: error "Maximum stock exceeded" |
+| OUT      | Quantity > 0 and ≤ current stock | Valid: stock decreases |
+| OUT      | Quantity > current stock | Invalid: error "Insufficient stock" |
+| OUT      | Quantity ≤ 0 | Invalid: error "Invalid quantity" |
 
 ## How to execute
 
