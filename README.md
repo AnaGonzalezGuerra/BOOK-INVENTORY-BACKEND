@@ -17,11 +17,9 @@ REST API for managing books and their inventory
 
 🚧 **Project status**
 
-Currently in initial design phase.
+Currently in initial technical setup
 
-First objective:
 
-Clearly define the domain and rules before writing code.
 
 
 ## 🎯Goal
