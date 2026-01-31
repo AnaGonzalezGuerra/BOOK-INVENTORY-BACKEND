@@ -104,5 +104,14 @@ Each movement impacts the inventory and is recorded for auditing purposes.
 
 ## How to execute
 
+### Configure python environment with conda
+```
+conda create -n back python=3.14.2
+conda activate back
+pip install -r requirements.txt
+```
+
+
+
 ## What would improve next time?
 
