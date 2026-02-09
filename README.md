@@ -127,7 +127,12 @@ conda create -n back python=3.14.2
 conda activate back
 pip install -r requirements.txt
 ```
+### Export requirements if new libraries installed
 
+```
+conda activate back
+pip list --format=freeze > requirements.txt
+```
 
 
 ## What would improve next time?
