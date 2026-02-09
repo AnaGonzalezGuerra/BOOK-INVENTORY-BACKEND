@@ -81,6 +81,25 @@ Provide a solid foundation for managing:
 
 Each movement impacts the inventory and is recorded for auditing purposes.
 
+
+### ERD
+
+The ERD (.vuerd.json file(s)) represents the initial domain design used as a starting point.
+After the initial design phase, the ORM models and Alembic migrations
+are considered the source of truth for the database schema.
+
+### ORM model 
+
+Every table of the model will have three basic columns: 
+
+- id: Primary key, which is automatically incremented.
+
+- created_at: Date and time of record creation, set automatically.
+
+- updated_at: Date and time of the last update of the record, automatically updated with each change.
+
+The naming convention used to intuitively map models to database tables is to define model names as the pluralized form of the table name, converted to lowercase.
+
 ## ⚙️ Business Rules (Summary)
 
 - Stock can never be negative.
