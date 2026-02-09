@@ -1,11 +1,12 @@
 """Database configuration and setup."""
 from datetime import datetime
 from sqlalchemy import Integer, String, DateTime, Text, func
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, relationship
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
+import enum
 
 from config import Settings
 
@@ -54,12 +55,33 @@ class Book(Base):
     isbn: Mapped[str] = mapped_column(String(13), unique=True, nullable=False)
     published_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[str] = mapped_column(Text)
+   
+    inventory: Mapped["Inventory"] = relationship(
+        "Inventory",
+        back_populates="Book",
+        uselist=False,  # Each book has one inventory record
+        cascade="all, delete-orphan"
+    )
 
 
 class Inventory(Base):
     """Model representing the inventory of books."""
     stock: Mapped[int] = mapped_column(Integer, nullable=False)
     book_id: Mapped[int] = mapped_column(Integer, ForeignKey('books.id'))
+   
+    book: Mapped["Book"] = relationship(
+        "Book",
+        back_populates="Inventory",
+        uselist=False  # Each book has one inventory record
+        
+    )
+    
+    inventoryMovements: Mapped[list["InventoryMovement"]] = relationship(
+        "InventoryMovement",
+        back_populates="Inventory",
+        uselist=True,  # Each inventory can have multiple movements
+        cascade="all, delete-orphan"
+    )
 
 
 class InventoryMovement(Base):
@@ -67,7 +89,19 @@ class InventoryMovement(Base):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     # movement_type examples: e.g., 'addition', 'removal'
     movement_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    book_id: Mapped[int] = mapped_column(Integer, ForeignKey('inventorys.id'))
+    inventory_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey('inventorys.id'))
+    
+    inventory: Mapped["Inventory"] = relationship(
+        "Inventory",
+        back_populates="InventoryMovement",
+        uselist=False  # Each inventory movement belongs to one inventory
+       
+    )
     
 
+class MovementTypeEnum(str, enum.Enum):
+    """Enum representing the type of inventory movement."""
+    ADDITION = "addition"
+    REMOVAL = "removal"
 
