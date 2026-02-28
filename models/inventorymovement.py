@@ -3,7 +3,6 @@ import enum
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from config.db import Base
-from models.inventory import Inventory
 
 
 class InventoryMovement(Base):

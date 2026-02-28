@@ -3,7 +3,6 @@ from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from config.db import Base
 from models.book import Book
-from models.inventorymovement import InventoryMovement
 
 
 class Inventory(Base):

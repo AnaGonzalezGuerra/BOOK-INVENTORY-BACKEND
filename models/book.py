@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import String, DateTime, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from config.db import Base
-from models.inventory import Inventory
 
 
 class Book(Base):
