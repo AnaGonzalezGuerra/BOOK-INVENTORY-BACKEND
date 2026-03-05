@@ -9,24 +9,46 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from config.config import Settings
 
 settings = Settings()
-DATABASE_URL = settings.database_url
 
-# We create an asynchronous engine for working with a database
-
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,  # Set to True to see the generated SQL queries in the console
-    pool_pre_ping=True,  # Check if the connection is alive before using it
+# ⚡ Engine sincrónico para Alembic (se crea inmediatamente)
+# Construir URL sincrónica a partir de settings (reemplazar asyncpg con psycopg2)
+SYNC_DATABASE_URL = (
+    f"postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASSWORD}@"
+    f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 )
-# Create a session factory to interact with the database
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
-# ⚡ Nuevo: engine sincrónico solo para Alembic
-SYNC_DATABASE_URL = DATABASE_URL.replace("postgresql+asyncpg", "postgresql+psycopg")
 sync_engine = create_engine(SYNC_DATABASE_URL, echo=False)
+
+# Engine async para la aplicación (lazy - se crea cuando se necesita)
+_async_engine = None
+_async_session_maker = None
+
+def get_async_engine():
+    """Get or create the async engine for the application."""
+    global _async_engine
+    if _async_engine is None:
+        database_url = settings.database_url
+        _async_engine = create_async_engine(
+            database_url,
+            echo=False,
+            pool_pre_ping=True,
+        )
+    return _async_engine
+
+def get_async_session_maker():
+    """Get or create the async session maker."""
+    global _async_session_maker
+    if _async_session_maker is None:
+        _async_session_maker = async_sessionmaker(get_async_engine(), expire_on_commit=False)
+    return _async_session_maker
+
+
+# Lazy exports - se crean solo cuando se llaman
+engine = get_async_engine
+async_session_maker = get_async_session_maker
+
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class for all models"""
-    # The class is abstract so that you don't have to create a separate table
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(
@@ -35,15 +57,15 @@ class Base(AsyncAttrs, DeclarativeBase):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        server_default=func.now()  # pylint: disable=not-callable
+        server_default=func.now()
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        server_default=func.now(),  # pylint: disable=not-callable
-        onupdate=func.now()         # pylint: disable=not-callable
+        server_default=func.now(),
+        onupdate=func.now()
     )
 
     @declared_attr.directive
-    def __tablename__(cls) -> str:  # pylint: disable=no-self-argument
+    def __tablename__(cls) -> str:
         return cls.__name__.lower() + "s"
