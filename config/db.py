@@ -10,17 +10,19 @@ from config.config import Settings
 
 settings = Settings()
 
-# ⚡ Engine sincrónico para Alembic (se crea inmediatamente)
-# Construir URL sincrónica a partir de settings (reemplazar asyncpg con psycopg2)
+# ⚡ Synchronous engine for Alembic (created immediately)
+# Build synchronous URL from settings (replace asyncpg with psycopg2)
+
 SYNC_DATABASE_URL = (
     f"postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASSWORD}@"
     f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 )
 sync_engine = create_engine(SYNC_DATABASE_URL, echo=False)
 
-# Engine async para la aplicación (lazy - se crea cuando se necesita)
+# lazy engine for the application (created on demand)
 _async_engine = None
 _async_session_maker = None
+
 
 def get_async_engine():
     """Get or create the async engine for the application."""
@@ -34,6 +36,7 @@ def get_async_engine():
         )
     return _async_engine
 
+
 def get_async_session_maker():
     """Get or create the async session maker."""
     global _async_session_maker
@@ -42,7 +45,7 @@ def get_async_session_maker():
     return _async_session_maker
 
 
-# Lazy exports - se crean solo cuando se llaman
+# lazy export 
 engine = get_async_engine
 async_session_maker = get_async_session_maker
 
