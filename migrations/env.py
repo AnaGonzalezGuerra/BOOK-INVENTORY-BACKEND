@@ -17,17 +17,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-print(f"📋 Tablas detectadas: {list(Base.metadata.tables.keys())}")
-print()
-print("🔍 DEBUG - Variables de Configuración:")
-print(f"  DB_USER: {settings.DB_USER}")
-print(f"  DB_PASSWORD: {'*' * len(settings.DB_PASSWORD) if settings.DB_PASSWORD else '(vacío)'}")
-print(f"  DB_HOST: {settings.DB_HOST}")
-print(f"  DB_PORT: {settings.DB_PORT}")
-print(f"  DB_NAME: {settings.DB_NAME}")
-print()
-print(f"🔗 DATABASE URL: {settings.database_url}")
-print()
 
 
 def run_migrations_offline() -> None:
