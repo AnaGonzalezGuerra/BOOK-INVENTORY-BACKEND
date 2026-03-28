@@ -1,8 +1,12 @@
 """Models for inventory movements and related enums."""
 import enum
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from config.db import Base
+
+if TYPE_CHECKING:
+    from models.inventory import Inventory
 
 
 class InventoryMovement(Base):

@@ -11,7 +11,7 @@ class Book(Base):
     isbn: Mapped[str] = mapped_column(String(13), unique=True, nullable=False)
     published_date: Mapped[datetime] = mapped_column(
         DateTime, nullable=False)
-    description: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
     inventory: Mapped["Inventory"] = relationship(
         "Inventory",
         back_populates="book",

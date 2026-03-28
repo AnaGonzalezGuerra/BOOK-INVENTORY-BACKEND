@@ -1,8 +1,11 @@
 """Model for inventory tracking in the system."""
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from config.db import Base
-from models.book import Book
+
+if TYPE_CHECKING:
+    from models.book import Book
 
 
 class Inventory(Base):
