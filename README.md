@@ -17,7 +17,7 @@ REST API for managing books and their inventory
 
 🚧 **Project status**
 
-Currently in initial technical setup
+Currently working in creating endpoints for book management. 
 
 
 
