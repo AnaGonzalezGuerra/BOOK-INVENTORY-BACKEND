@@ -4,7 +4,7 @@ from sqlalchemy import Integer, DateTime, create_engine, func
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from config.config import Settings
 
@@ -48,6 +48,16 @@ def get_async_session_maker():
 # lazy export 
 engine = get_async_engine
 async_session_maker = get_async_session_maker
+
+
+async def get_async_session() -> AsyncSession:
+    """Dependency for FastAPI to inject async session into routes."""
+    async_session = get_async_session_maker()
+    async with async_session() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
 class Base(AsyncAttrs, DeclarativeBase):
