@@ -9,6 +9,8 @@ import uvicorn
 # My imports
 from routers.v1.routers import api_router
 from config.config import Settings
+# Import all models to register them with SQLAlchemy before app starts
+from models import Book, Inventory, InventoryMovement
 
 settings = Settings()
 
