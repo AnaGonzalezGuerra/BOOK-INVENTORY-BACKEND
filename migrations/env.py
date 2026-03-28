@@ -7,9 +7,8 @@ from alembic import context
 
 # My imports
 from config.db import Base, sync_engine, settings, engine
-from models.book import Book
-from models.inventory import Inventory
-from models.inventorymovement import InventoryMovement
+# Import all models to register them with SQLAlchemy
+from models import Book, Inventory, InventoryMovement
 
 config = context.config
 
