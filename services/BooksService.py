@@ -55,6 +55,12 @@ class BooksService:
                     message="El ISBN ya existe en la base de datos",
                     error_code="DUPLICATE_ISBN"
                 )
+            if "not null" in str(e.orig).lower():
+                raise CustomException(
+                    status_code=422,
+                    message="Faltan campos obligatorios para crear el libro",
+                    error_code="MISSING_FIELDS"
+                )
             
             raise CustomException(
                 status_code=400,

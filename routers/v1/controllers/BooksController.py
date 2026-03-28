@@ -38,7 +38,8 @@ async def create_book(
         # Call service to create book
         created_book = await service.create_book(book_dict)
         
-        return created_book
+        # ✅ Convert ORM model to Pydantic response model
+        return BookResponse.model_validate(created_book)
         
     except CustomException:
         # Re-raise custom exceptions
