@@ -1,5 +1,9 @@
 # BOOK INVENTORY BACKEND
-REST API for managing books and their inventory
+REST API for managing books and their inventory.
+
+In case you want to go deep with the project:
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/AnaGonzalezGuerra/BOOK-INVENTORY-BACKEND)
 
 ## Index
 
