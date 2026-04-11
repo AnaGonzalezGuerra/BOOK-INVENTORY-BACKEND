@@ -146,3 +146,39 @@ class BooksService:
                 message=f"Error al obtener libros: {str(e)}",
                 error_code="GET_BOOKS_ERROR"
             )
+            
+    async def get_book_by_id(self, book_id: int) -> Book:
+        """
+        Retrieve a single book by its ID.
+        
+        Args:
+            book_id: The ID of the book to retrieve
+            
+        Returns:
+            Book: The book with the specified ID
+            
+        Raises:
+            CustomException: If book not found or database operation fails
+        """
+        try:
+            query = select(Book).where(Book.id == book_id)
+            result = await self.session.execute(query)
+            book = result.scalar_one_or_none()
+            
+            if not book:
+                raise CustomException(
+                    status_code=404,
+                    message=f"Libro con ID {book_id} no encontrado",
+                    error_code="BOOK_NOT_FOUND"
+                )
+            
+            return book
+            
+        except CustomException:
+            raise
+        except Exception as e:
+            raise CustomException(
+                status_code=500,
+                message=f"Error al obtener el libro por ID: {str(e)}",
+                error_code="GET_BOOK_BY_ID_ERROR"
+            )

@@ -96,3 +96,41 @@ async def get_books(
             message=f"Error inesperado: {str(e)}",
             error_code="UNEXPECTED_ERROR"
         )
+
+@router.get("/GetBooksById/{book_id}", status_code=200)
+async def get_book_by_id(
+    book_id: int,
+    session: Annotated[AsyncSession, Depends(get_async_session)]
+) -> BookResponse:
+    """
+    Retrieve a single book by its ID.
+    
+    Args:
+        book_id: The ID of the book to retrieve
+        session: AsyncSession injected by FastAPI dependency
+        
+    Returns:
+        BookResponse: The book with the specified ID
+        
+    Raises:
+        CustomException: If book not found or database operation fails
+    """
+    try:
+        service = BooksService(session)
+        book = await service.get_book_by_id(book_id)
+        if not book:
+            raise CustomException(
+                status_code=404,
+                message=f"Libro con ID {book_id} no encontrado",
+                error_code="BOOK_NOT_FOUND"
+            )
+        return BookResponse.model_validate(book)
+        
+    except CustomException:
+        raise
+    except Exception as e:
+        raise CustomException(
+            status_code=500,
+            message=f"Error inesperado: {str(e)}",
+            error_code="UNEXPECTED_ERROR"
+        )
