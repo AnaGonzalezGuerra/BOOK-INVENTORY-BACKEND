@@ -1,5 +1,7 @@
 """Books Controller - HTTP endpoints for book operations."""
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.db import get_async_session
@@ -10,10 +12,10 @@ from utils.custom_exceptions import CustomException
 router = APIRouter(prefix="/books", tags=["books"])
 
 
-@router.post("/CreateBook", status_code=201, response_model=BookResponse)
+@router.post("/CreateBook", status_code=201)
 async def create_book(
     book_data: BookCreate,
-    session: AsyncSession = Depends(get_async_session)
+    session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> BookResponse:
     """
     Create a new book in the inventory system.
@@ -38,7 +40,7 @@ async def create_book(
         # Call service to create book
         created_book = await service.create_book(book_dict)
         
-        # ✅ Convert ORM model to Pydantic response model
+        # Convert ORM model to Pydantic response model
         return BookResponse.model_validate(created_book)
         
     except CustomException:
@@ -51,4 +53,46 @@ async def create_book(
             error_code="UNEXPECTED_ERROR"
         )
 
-
+@router.get("/GetBooks", status_code=200)
+async def get_books(
+    skip: Annotated[int, Query(ge=0, description="Number of records to skip")] = 0,
+    limit: Annotated[int, Query(ge=1, le=100, description="Number of records to return")] = 50,
+    sort_by: Annotated[str, Query(description="Field to sort by (id, title, isbn, published_date)")] = "id",
+    sort_order: Annotated[str, Query(pattern="^(asc|desc)$", description="Sort order")] = "asc",
+    session: Annotated[AsyncSession, Depends(get_async_session)] = None
+) -> list[BookResponse]:
+    """
+    Retrieve all books with pagination, filtering, and sorting.
+    
+    Args:
+        skip: Number of records to skip (default: 0)
+        limit: Number of records to return (default: 50, max: 100)
+        sort_by: Field to sort by (default: id)
+        sort_order: Sort order "asc" or "desc" (default: asc)
+        search: Optional search string to filter by title or ISBN
+        session: AsyncSession injected by FastAPI dependency
+        
+    Returns:
+        List[BookResponse]: List of books matching the criteria
+        
+    Raises:
+        CustomException: If database operation fails
+    """
+    try:
+        service = BooksService(session)
+        books = await service.get_books(
+            skip=skip,
+            limit=limit,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        return [BookResponse.model_validate(book) for book in books]
+        
+    except CustomException:
+        raise
+    except Exception as e:
+        raise CustomException(
+            status_code=500,
+            message=f"Error inesperado: {str(e)}",
+            error_code="UNEXPECTED_ERROR"
+        )

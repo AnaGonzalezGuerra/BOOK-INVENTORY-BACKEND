@@ -1,6 +1,7 @@
 """Books Service - Business logic for book operations."""
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, asc, desc
 from models.book import Book
 from utils.custom_exceptions import CustomException
 
@@ -74,4 +75,74 @@ class BooksService:
                 status_code=500,
                 message=f"Error al crear el libro: {str(e)}",
                 error_code="CREATE_BOOK_ERROR"
+            )
+                
+    async def get_books(
+        self,
+        skip: int = 0,
+        limit: int = 50,
+        sort_by: str = "id",
+        sort_order: str = "asc"
+    ) -> list[Book]:
+        """
+        Retrieve books from the database with pagination and filtering.
+        
+        Args:
+            skip: Number of records to skip (default: 0)
+            limit: Number of records to return (default: 50, max: 100)
+            sort_by: Field to sort by (default: "id")
+            sort_order: Sort order "asc" or "desc" (default: "asc")
+            
+        Returns:
+            List[Book]: A list of book objects
+            
+        Raises:
+            CustomException: If database operation fails or invalid sort field
+        """
+        try:
+            # Validate sort_by field
+            valid_sort_fields = ["id", "title", "isbn", "published_date"]
+            if sort_by not in valid_sort_fields:
+                raise CustomException(
+                    status_code=400,
+                    message=f"Campo de ordenamiento inválido: {sort_by}. Válidos: {', '.join(valid_sort_fields)}",
+                    error_code="INVALID_SORT_FIELD"
+                )
+            
+            # Validate and limit pagination parameters
+            skip = max(0, skip)
+            limit = min(100, max(1, limit))
+            
+            # Build query
+            query = select(Book)
+                        
+            # Add sorting
+            sort_column = getattr(Book, sort_by, Book.id)
+            if sort_order.lower() == "desc":
+                query = query.order_by(desc(sort_column))
+            else:
+                query = query.order_by(asc(sort_column))
+            
+            # Add pagination
+            query = query.offset(skip).limit(limit)
+            
+            # Execute query
+            result = await self.session.execute(query)
+            books = result.scalars().all()
+            
+            # Validate if any books found
+            if not books:
+                raise CustomException(
+                    status_code=404,
+                    message="No hay libros disponibles con los parámetros especificados",
+                    error_code="NO_BOOKS_FOUND"
+                )
+            
+            return list(books)
+            
+        except Exception as e:
+            raise CustomException(
+                status_code=500,
+                message=f"Error al obtener libros: {str(e)}",
+                error_code="GET_BOOKS_ERROR"
             )
