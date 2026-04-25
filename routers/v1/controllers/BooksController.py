@@ -1,7 +1,7 @@
 """Books Controller - HTTP endpoints for book operations."""
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.db import get_async_session
@@ -12,7 +12,7 @@ from utils.custom_exceptions import CustomException
 router = APIRouter(prefix="/books", tags=["books"])
 
 
-@router.post("/CreateBook", status_code=201)
+@router.post("", status_code=201)
 async def create_book(
     book_data: BookCreate,
     session: Annotated[AsyncSession, Depends(get_async_session)]
@@ -53,7 +53,7 @@ async def create_book(
             error_code="UNEXPECTED_ERROR"
         )
 
-@router.get("/GetBooks", status_code=200)
+@router.get("", status_code=200)
 async def get_books(
     skip: Annotated[int, Query(ge=0, description="Number of records to skip")] = 0,
     limit: Annotated[int, Query(ge=1, le=100, description="Number of records to return")] = 50,
@@ -97,9 +97,9 @@ async def get_books(
             error_code="UNEXPECTED_ERROR"
         )
 
-@router.get("/GetBooksById/{book_id}", status_code=200)
+@router.get("/{book_id}", status_code=200)
 async def get_book_by_id(
-    book_id: int,
+    book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
     session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> BookResponse:
     """
