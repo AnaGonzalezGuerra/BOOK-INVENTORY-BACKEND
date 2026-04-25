@@ -34,3 +34,67 @@ class BookResponse(BaseModel):
 
     class Config:
         from_attributes = True  # Permite convertir objetos ORM a Pydantic
+
+
+class InventoryCreate(BaseModel):
+    """Schema for creating an inventory record."""
+    book_id: int = Field(..., gt=0, description="Book ID")
+    quantity: int = Field(..., ge=0, description="Initial inventory quantity")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "book_id": 1,
+                "quantity": 50
+            }
+        }
+
+
+class InventoryResponse(BaseModel):
+    """Schema for inventory response."""
+    id: int
+    book_id: int
+    stock: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class MovementQuantity(BaseModel):
+    """Schema for inventory movement with only quantity (for add/remove operations)."""
+    quantity: int = Field(..., gt=0, description="Quantity to add or remove")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "quantity": 10
+            }
+        }
+
+
+class MovementCreate(BaseModel):
+    """Schema for creating inventory movements with explicit type."""
+    movement_type: str = Field(..., pattern="^(addition|removal)$", description="Type of movement")
+    quantity: int = Field(..., gt=0, description="Quantity to add or remove")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "movement_type": "addition",
+                "quantity": 10
+            }
+        }
+
+
+class MovementResponse(BaseModel):
+    """Schema for movement response."""
+    id: int
+    inventory_id: int
+    movement_type: str
+    quantity: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

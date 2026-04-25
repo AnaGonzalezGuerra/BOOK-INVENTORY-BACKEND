@@ -24,5 +24,6 @@ class InventoryMovement(Base):
 
 class MovementTypeEnum(str, enum.Enum):
     """Enum representing the type of inventory movement."""
+    CREATION = "creation"
     ADDITION = "addition"
     REMOVAL = "removal"
