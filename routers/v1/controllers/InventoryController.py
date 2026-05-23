@@ -116,44 +116,6 @@ async def get_inventory(
         )
 
 
-@router.post("/book/{book_id}", status_code=200)
-async def add_inventory(
-    book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
-    movement_data: MovementQuantity = None,
-    session: Annotated[AsyncSession, Depends(get_async_session)] = None
-) -> InventoryResponse:
-    """
-    Add quantity to book inventory and record movement as 'addition'.
-    
-    Args:
-        book_id: ID of the book
-        movement_data: MovementQuantity schema with quantity (movement_type defaults to 'addition')
-        session: AsyncSession injected by FastAPI dependency
-        
-    Returns:
-        InventoryResponse: Updated inventory information
-        
-    Raises:
-        CustomException: If inventory not found or operation fails
-    """
-    try:
-        service = InventoryService(session)
-        updated_inventory = await service.add_inventory(
-            book_id=book_id,
-            quantity=movement_data.quantity
-        )
-        return InventoryResponse.model_validate(updated_inventory)
-        
-    except CustomException:
-        raise
-    except Exception as e:
-        raise CustomException(
-            status_code=500,
-            message=f"Error inesperado: {str(e)}",
-            error_code="UNEXPECTED_ERROR"
-        )
-
-
 @router.delete("/book/{book_id}", status_code=200)
 async def remove_inventory(
     book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
@@ -197,7 +159,7 @@ async def get_movements(
     book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
     skip: Annotated[int, Query(ge=0, description="Number of records to skip")] = 0,
     limit: Annotated[int, Query(ge=1, le=100, description="Number of records to return")] = 50,
-    movement_type: Annotated[str, Query(description="Filter by movement type (addition/removal)")] = None,
+    movement_type: Annotated[str, Query(description="Filter by movement type (creation/addition/removal)")] = None,
     session: Annotated[AsyncSession, Depends(get_async_session)] = None
 ) -> list[MovementResponse]:
     """
@@ -207,7 +169,7 @@ async def get_movements(
         book_id: ID of the book
         skip: Number of records to skip (default: 0)
         limit: Number of records to return (default: 50, max: 100)
-        movement_type: Optional filter by movement type (addition/removal)
+        movement_type: Optional filter by movement type (creation/addition/removal)
         session: AsyncSession injected by FastAPI dependency
         
     Returns:
