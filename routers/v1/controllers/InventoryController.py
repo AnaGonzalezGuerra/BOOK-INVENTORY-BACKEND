@@ -89,7 +89,8 @@ async def get_inventory(
     session: Annotated[AsyncSession, Depends(get_async_session)] = None
 ) -> InventoryResponse:
     """
-    Get inventory record for a specific book.
+    Get inventory record for a specific book, this means, 
+    the current stock the book has or samples available.
     
     Args:
         book_id: ID of the book
@@ -163,7 +164,9 @@ async def get_movements(
     session: Annotated[AsyncSession, Depends(get_async_session)] = None
 ) -> list[MovementResponse]:
     """
-    Get movement history for a book's inventory.
+    Get movement history for a book's inventory. This means, we can answer the questions:
+    What happened to the inventory of this book? When was it created, when was it added, when was it removed?
+    How many units were created (initial stock), how many were added, how many were removed?
     
     Args:
         book_id: ID of the book
