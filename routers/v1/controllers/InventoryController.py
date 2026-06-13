@@ -117,42 +117,6 @@ async def get_inventory(
         )
 
 
-@router.delete("/book/{book_id}", status_code=200)
-async def remove_inventory(
-    book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
-    quantity: Annotated[int, Query(..., gt=0, description="Quantity to remove")] = None,
-    session: Annotated[AsyncSession, Depends(get_async_session)] = None
-) -> InventoryResponse:
-    """
-    Remove quantity from book inventory and record movement.
-    
-    Args:
-        book_id: ID of the book
-        quantity: Quantity to remove from inventory
-        session: AsyncSession injected by FastAPI dependency
-        
-    Returns:
-        InventoryResponse: Updated inventory information
-        
-    Raises:
-        CustomException: If insufficient inventory or inventory not found
-    """
-    try:
-        service = InventoryService(session)
-        updated_inventory = await service.remove_inventory(
-            book_id=book_id,
-            quantity=quantity
-        )
-        return InventoryResponse.model_validate(updated_inventory)
-        
-    except CustomException:
-        raise
-    except Exception as e:
-        raise CustomException(
-            status_code=500,
-            message=f"Error inesperado: {str(e)}",
-            error_code="UNEXPECTED_ERROR"
-        )
 
 
 @router.get("/book/{book_id}/movements", status_code=200)
@@ -190,6 +154,43 @@ async def get_movements(
             movement_type=movement_type
         )
         return [MovementResponse.model_validate(movement) for movement in movements]
+        
+    except CustomException:
+        raise
+    except Exception as e:
+        raise CustomException(
+            status_code=500,
+            message=f"Error inesperado: {str(e)}",
+            error_code="UNEXPECTED_ERROR"
+        )
+
+@router.delete("/book/{book_id}", status_code=200)
+async def remove_inventory(
+    book_id: Annotated[int, Path(..., gt=0, description="Book ID")],
+    quantity: Annotated[int, Query(..., gt=0, description="Quantity to remove")] = None,
+    session: Annotated[AsyncSession, Depends(get_async_session)] = None
+) -> InventoryResponse:
+    """
+    Remove quantity from book inventory and record movement.
+    
+    Args:
+        book_id: ID of the book
+        quantity: Quantity to remove from inventory
+        session: AsyncSession injected by FastAPI dependency
+        
+    Returns:
+        InventoryResponse: Updated inventory information
+        
+    Raises:
+        CustomException: If insufficient inventory or inventory not found
+    """
+    try:
+        service = InventoryService(session)
+        updated_inventory = await service.remove_inventory(
+            book_id=book_id,
+            quantity=quantity
+        )
+        return InventoryResponse.model_validate(updated_inventory)
         
     except CustomException:
         raise
