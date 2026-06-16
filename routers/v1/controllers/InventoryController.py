@@ -125,7 +125,8 @@ async def get_movements(
     skip: Annotated[int, Query(ge=0, description="Number of records to skip")] = 0,
     limit: Annotated[int, Query(ge=1, le=100, description="Number of records to return")] = 50,
     movement_type: Annotated[str, Query(description="Filter by movement type (creation/addition/removal)")] = None,
-    session: Annotated[AsyncSession, Depends(get_async_session)] = None
+    session: Annotated[AsyncSession, Depends(get_async_session)] = None,
+    sort_by: Annotated[str, Query(description="Optional sort field (e.g., 'created_at')")] = None
 ) -> list[MovementResponse]:
     """
     Get movement history for a book's inventory. This means, we can answer the questions:
@@ -137,6 +138,7 @@ async def get_movements(
         skip: Number of records to skip (default: 0)
         limit: Number of records to return (default: 50, max: 100)
         movement_type: Optional filter by movement type (creation/addition/removal)
+        sort_by: Optional sort field (e.g., 'created_at')
         session: AsyncSession injected by FastAPI dependency
         
     Returns:
@@ -151,7 +153,8 @@ async def get_movements(
             book_id=book_id,
             skip=skip,
             limit=limit,
-            movement_type=movement_type
+            movement_type=movement_type,
+            sort_by=sort_by
         )
         return [MovementResponse.model_validate(movement) for movement in movements]
         

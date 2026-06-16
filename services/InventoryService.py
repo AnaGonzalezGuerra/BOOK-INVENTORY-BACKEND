@@ -268,7 +268,8 @@ class InventoryService:
         book_id: int,
         skip: int = 0,
         limit: int = 50,
-        movement_type: str = None
+        movement_type: str = None,
+        sort_by: str = None
     ) -> list[InventoryMovement]:
         """
         Get movement history for a book's inventory.
@@ -278,7 +279,8 @@ class InventoryService:
             skip: Number of records to skip
             limit: Number of records to return
             movement_type: Optional filter by movement type (creation/addition/removal)
-            
+            sort_by: Optional sort field (e.g., 'created_at')
+
         Returns:
             List[InventoryMovement]: List of movements
             
@@ -309,6 +311,11 @@ class InventoryService:
             
             if movement_type:
                 query = query.where(InventoryMovement.movement_type == movement_type)
+            
+            # Optional sorting
+            if sort_by:
+                if sort_by == "created_at":
+                    query = query.order_by(InventoryMovement.created_at)
             
             query = query.offset(skip).limit(limit)
             
